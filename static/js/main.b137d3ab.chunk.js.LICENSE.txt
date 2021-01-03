@@ -1,0 +1,7 @@
+//! explore_possible_moves method.
+
+//! group_count function.
+
+//! is_adjacency_satisfied function.
+
+//! is_placement_valid function.
