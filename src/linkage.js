@@ -111,7 +111,7 @@ export function groupCount(gameboard_state){
 
 		for(const gameboard_tile of gameboard_row){
 
-			if(gameboard_visited[i][j] === false && gameboard_tile !== 0 && gameboard_tile !== gameboard_state.length){
+			if(gameboard_visited[i][j] === false && gameboard_tile !== null && gameboard_tile !== gameboard_state.length){
 
 				// Valid piece not counted before.
 				tile_stack.push([i,j]);
@@ -170,7 +170,7 @@ export function groupCount(gameboard_state){
 		j=0;
 		++i;
 	}
-	return num_of_groups;
+	return num_of_groups - 1; //Center tile will count as a group.
 }
 
 export function isGamEnded(gameboard_state) { 

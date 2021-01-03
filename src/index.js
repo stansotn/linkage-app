@@ -67,7 +67,8 @@ class Board extends React.Component {
     };
   }
 
-  // Click on gameboard or colorpicker.
+  // Click on the colorpicker: @param i represents color.
+  // Click on the gameboard: @param i, j represent location.
   handleClick(i, j){
 
     if(this.state.winner == null && j !== undefined){
@@ -116,11 +117,11 @@ class Board extends React.Component {
             var turn_skipped = false;
             var winner = null;
 
-            if(!game_ended && possible_moves === 0){
+            if(!game_ended && possible_moves.length === 0){
 
               // Clear candidate move
               candidate_move = linkage.clearCandidateMove(squares);
-
+              console.log('turn skipped');
               turn_skipped = true;
             }
             else if(game_ended){
@@ -179,8 +180,6 @@ class Board extends React.Component {
   }
   renderSquare(selected, i, j) {
 
-    // Click on the colorpicker: @param i represents color.
-    // Click on the gameboard: @param i, j represent location.
     const color = (j === undefined) ? i : this.state.gameboard[i][j];
 
     return (
@@ -196,7 +195,7 @@ class Board extends React.Component {
     return (
       <Square 
         color={color}
-        selected={(this.state.move_stage.selected_color == color) ? 'X' : null}
+        selected={(this.state.move_stage.selected_color === color) ? 'X' : null}
         onClick={() => this.handleClick(color)}
       />
     );
@@ -208,7 +207,7 @@ class Board extends React.Component {
     // Click on the gameboard: @param i, j represent location.
     var selected = null;
 
-    if(this.state.move_stage.placement.i == i && this.state.move_stage.placement.j == j){
+    if(this.state.move_stage.placement.i === i && this.state.move_stage.placement.j === j){
 
       selected = this.state.move_stage.selected_color;
     }
