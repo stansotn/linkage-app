@@ -20,54 +20,47 @@ ol, ul {
 
 .square {
   /*background: #fff;*/
+  
   border: 2px solid black;
   float: left;
   font-size: 24px;
   font-weight: bold;
   line-height: 34px;
   height: 50px;
-  margin-right: -2px;
-  margin-top: -2px;
+  /*margin-right: -2px;
+  margin-top: -2px;*/
+  margin: -1px;
   padding: 0;
   text-align: center;
   width: 50px;
 
 }
+.selected-square{
+  
+  border: 2px solid transparent;
 
-.square:focus {
-  outline: none;
+  height: 40px;
+  width: 40px;
+  margin-left: 1px;
+  padding: 0;
 }
-
-.kbd-navigation .square:focus {
-  background: #ddd;
-}
-
-/*
-.game {
-  display: flex;
-  flex-direction: row;
-}
-
-.game-board{
-  margin: auto;
-}
-*/
 .game{
-  margin-left: 30%;
+  
+  margin: auto;
+  width:525px
 }
 .game-board{
+  
   margin-left: 87.5px;
+  margin-right: 87.5px;
 }
 .colorpicker{
   display: inline-flex;
   
   padding-left: 25px;
   margin-top: 50px;
+  margin-bottom: 250px;
   
-}
-
-.game-info {
-  margin-left: 20px;
 }
 
 

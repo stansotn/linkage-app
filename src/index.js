@@ -15,15 +15,21 @@ function Square(props){
     'Y': 'yellow',
     'R': 'red',
     'B': 'blue',
-    'X': 'purple',
+    'X': 'black',
     'O': 'white',
   };
 
   const style = {
-    background: colormap[props.value],
+    background: colormap[props.color],
   }
 
-  return (<button className="square" onClick={props.onClick} style={style} />);
+  const selected_style = {
+    border: (props.selected != null) ? '2px solid ' + colormap[props.selected] : '2px solid transparent',
+  }
+
+  const selected_div = (<div className="selected-square" style={selected_style}></div>);
+
+  return (<button className="square" onClick={props.onClick} style={style} >{selected_div}</button>);
 
 }
 
@@ -171,19 +177,51 @@ class Board extends React.Component {
       },
     });
   }
-  renderSquare(i, j) {
+  renderSquare(selected, i, j) {
 
     // Click on the colorpicker: @param i represents color.
     // Click on the gameboard: @param i, j represent location.
-    var value = (j === undefined) ? i : this.state.gameboard[i][j];
+    const color = (j === undefined) ? i : this.state.gameboard[i][j];
 
     return (
       <Square 
-        value={value}
+        color={color}
+        selected={selected}
         onClick={() => this.handleClick(i, j)}
       />
     );
   }
+  renderColorpickerSquare(color){
+
+    return (
+      <Square 
+        color={color}
+        selected={(this.state.move_stage.selected_color == color) ? 'X' : null}
+        onClick={() => this.handleClick(color)}
+      />
+    );
+  }
+
+  renderGameboardSquare(i, j){
+
+    // Click on the colorpicker: @param i represents color.
+    // Click on the gameboard: @param i, j represent location.
+    var selected = null;
+
+    if(this.state.move_stage.placement.i == i && this.state.move_stage.placement.j == j){
+
+      selected = this.state.move_stage.selected_color;
+    }
+
+    return (
+      <Square 
+        color={this.state.gameboard[i][j]}
+        selected={selected}
+        onClick={() => this.handleClick(i, j)}
+      />
+    );
+  }
+
 
   render() {
 
@@ -211,7 +249,7 @@ class Board extends React.Component {
       var content_row = [];
       for(let j=0; j<board_size; j++){
 
-        content_row.push(this.renderSquare(i,j));
+        content_row.push(this.renderGameboardSquare(i,j));
       }
 
       gameboard_render.push(<div className="board-row">{content_row}</div>)
@@ -223,20 +261,20 @@ class Board extends React.Component {
         <div className="game-board">{gameboard_render}</div>
         
         <div className="colorpicker">
-          {this.state.colorpieces['Y'] ? this.renderSquare('Y') : this.renderSquare('C')}
-          {this.state.colorpieces['Y'] ? this.renderSquare('Y') : this.renderSquare('C')}
+          {this.state.colorpieces['Y'] ? this.renderColorpickerSquare('Y') : this.renderColorpickerSquare('C')}
+          {this.state.colorpieces['Y'] ? this.renderColorpickerSquare('Y') : this.renderColorpickerSquare('C')}
         </div>
         <div className="colorpicker">
-          {this.state.colorpieces['W'] ? this.renderSquare('W') : this.renderSquare('C')}
-          {this.state.colorpieces['W'] ? this.renderSquare('W') : this.renderSquare('C')}
+          {this.state.colorpieces['W'] ? this.renderColorpickerSquare('W') : this.renderColorpickerSquare('C')}
+          {this.state.colorpieces['W'] ? this.renderColorpickerSquare('W') : this.renderColorpickerSquare('C')}
         </div>
         <div className="colorpicker">
-          {this.state.colorpieces['R'] ? this.renderSquare('R') : this.renderSquare('C')}
-          {this.state.colorpieces['R'] ? this.renderSquare('R') : this.renderSquare('C')}
+          {this.state.colorpieces['R'] ? this.renderColorpickerSquare('R') : this.renderColorpickerSquare('C')}
+          {this.state.colorpieces['R'] ? this.renderColorpickerSquare('R') : this.renderColorpickerSquare('C')}
         </div>
         <div className="colorpicker">
-        {this.state.colorpieces['B'] ? this.renderSquare('B') : this.renderSquare('C')}
-          {this.state.colorpieces['B'] ? this.renderSquare('B') : this.renderSquare('C')}
+        {this.state.colorpieces['B'] ? this.renderColorpickerSquare('B') : this.renderColorpickerSquare('C')}
+          {this.state.colorpieces['B'] ? this.renderColorpickerSquare('B') : this.renderColorpickerSquare('C')}
         </div>
       </div>
     );
