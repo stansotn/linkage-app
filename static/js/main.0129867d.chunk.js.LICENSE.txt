@@ -5,3 +5,7 @@
 //! is_adjacency_satisfied function.
 
 //! is_placement_valid function.
+
+//! place_on_gameboard method.
+
+//! rank_valid_moves method
