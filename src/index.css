@@ -63,6 +63,7 @@ ol, ul {
   margin: auto;
   justify-content: space-evenly;
   width: 500px;
+  margin-bottom: 200px;
 }
 .colorpicker{
   display: inline-flex;
