@@ -62,8 +62,8 @@ class Board extends React.Component {
         color: null,
       },
       more_is_next: true,
-      game_mode: false,
-      computer_side: false,
+      game_mode: false, // is_single_player
+      computer_side: false, // is_computer_playing_for_more
       winner: null,
       turn_skipped: false,
       player_skips: false,
@@ -106,7 +106,7 @@ class Board extends React.Component {
 
           if(linkage.isPlacementValid(candidate_move, this.state.gameboard) && linkage.isAdjacencySatisfied(candidate_move, previous_move)){
 
-            this.registerMove(candidate_move);
+            this.playerMove(candidate_move);
           }
           else{
 
@@ -168,36 +168,44 @@ class Board extends React.Component {
     }
     const is_single_player = this.state.game_mode;
     const computer_side = this.state.computer_side ? 'More' : 'Less';
-
+    
+      
     const handleChange = (event) => {
       
       this.setState({
         [event.target.name]: event.target.checked,
+        move_stage: {
+          selected_color: null,
+          placement: {
+              i: null,
+              j: null,
+            },
+        },
       });
 
       // Figure out if Computer must make a move.
-      if(event.target.name == 'game_mode'){
+      if(event.target.name === 'game_mode'){
 
         if(event.target.checked){
 
           // Force change the state. Does not affect the UI.
-          this.state.is_single_player = true;
-          if(!(computer_side == 'More' != this.state.more_is_next)){
+          this.state.game_mode = true;
+          if(!((computer_side === 'More') !== this.state.more_is_next)){
             // Make More move
-            this.computerMoveRecursive();
+            this.computerMoveRecursive(JSON.parse(JSON.stringify(this.state)));
           }
         }
         else{
-          this.state.is_single_player = false;
+          this.state.game_mode = false;
         }
       }
-      else if(event.target.name == 'computer_side'){
+      else if(event.target.name === 'computer_side'){
 
         this.state.computer_side = event.target.checked;
         
-        if(!(event.target.checked != this.state.more_is_next)){
+        if(!(event.target.checked !== this.state.more_is_next)){
 
-          this.computerMoveRecursive();
+          this.computerMoveRecursive(JSON.parse(JSON.stringify(this.state)));
         }
       }
     };
@@ -212,29 +220,27 @@ class Board extends React.Component {
         </div>
 
         <div className="game-mode" className="game-mode-right">
-          <p className="game-mode" style={is_single_player ? (computer_side == 'Less' ? bold : normal) : disabled}>Less</p>
+          <p className="game-mode" style={is_single_player ? (computer_side === 'Less' ? bold : normal) : disabled}>Less</p>
             <Switch name="computer_side" disabled={!is_single_player || this.state.winner != null} color="grey" onChange={handleChange} />
-          <p className="game-mode" style={is_single_player ? (computer_side == 'More' ? bold : normal) : disabled}>More</p>
+          <p className="game-mode" style={is_single_player ? (computer_side === 'More' ? bold : normal) : disabled}>More</p>
         </div>
       </div>
     );
   }
 
-  computerMoveRecursive(){
+  computerMoveRecursive(game_state){
 
     // Sainity check.
-    if(!this.state.is_single_player){
+    if(!this.state.game_mode){
       return null;
     }
     // Copy entire gameboard state
     const computer_side = this.state.computer_side ? 'More' : 'Less';
 
-    var game_state = JSON.parse(JSON.stringify(this.state));
-
     var more_is_next = game_state.more_is_next;
     var game_ended = false;
 
-    while(more_is_next == game_state.more_is_next && !game_ended){
+    while(more_is_next === game_state.more_is_next && !game_ended){
 
       console.log('Hello');
       // Find a move
@@ -268,52 +274,44 @@ class Board extends React.Component {
 
       this.setState(game_state); 
     }
-
   }
 
-  registerMove(move){
+  playerMove(player_move){
 
-    var squares = this.state.gameboard.slice();
-    linkage.placeOnGameboard(move, squares);
+    var game_state = JSON.parse(JSON.stringify(this.state));
 
-    var colorpieces = this.state.colorpieces;
-    colorpieces[move.color] -= 1;
+    game_state.player_skips = false;
 
-    // candidate move is the previous move in the following function call.
-    const possible_moves = linkage.explorePossibleMoves(squares, move, this.state.colorpieces);
+    linkage.placeOnGameboard(player_move, game_state.gameboard);
 
-    const game_ended = linkage.isGamEnded(squares);
+    // Adjust quantity of the colorpieces.
+    game_state.colorpieces[player_move.color] -= 1;
 
-    var turn_skipped = false;
-    var winner = null;
+    // Check if there are moves left and if the game is ended.
+    const possible_moves = linkage.explorePossibleMoves(game_state.gameboard, player_move, game_state.colorpieces);
+    var game_ended = linkage.isGamEnded(game_state.gameboard);
 
     if(!game_ended && possible_moves.length === 0){
 
-      // Clear candidate move
-      move = linkage.clearCandidateMove(squares);
-      console.log('turn skipped');
-      turn_skipped = true;
-
+      game_state.previous_move = linkage.clearCandidateMove(game_state.gameboard);
+      game_state.computer_skips = game_state.game_mode; // Computer skips if single player mode
     }
     else if(game_ended){
 
-      const group_count = linkage.groupCount(squares);
-      winner = (group_count < 12) ? 'Less' : 'More';
-      console.log('The winner is: ' + winner);
-      console.log('Group count: ' + group_count);
+      const group_count = linkage.groupCount(game_state.gameboard);
+      game_state.winner = (group_count < 12) ? 'Less' : 'More';
     }
+    else{
+        
+      game_state.more_is_next = !game_state.more_is_next;
+      game_state.previous_move = player_move;
 
-    console.log('Found ' + possible_moves.length + ' possible moves!');
+      if(game_state.game_mode){
 
-    // Register a game state with react.
-    this.setState({
-      gameboard: squares,
-      colorpieces: colorpieces,
-      more_is_next: turn_skipped ? this.state.more_is_next : !this.state.more_is_next,
-      previous_move: move,
-      turn_skipped: turn_skipped,
-      winner: winner,
-    });
+        this.computerMoveRecursive(game_state);
+      }
+    }
+    this.setState(game_state); 
   }
 
   renderGameboardSquare(i, j){
@@ -321,7 +319,6 @@ class Board extends React.Component {
     // Click on the colorpicker: @param i represents color.
     // Click on the gameboard: @param i, j represent location.
     var selected = null;
-
 
     if(this.state.move_stage.placement.i === i && this.state.move_stage.placement.j === j){
 
@@ -336,7 +333,6 @@ class Board extends React.Component {
       />
     );
   }
-
 
   render() {
 
@@ -359,11 +355,16 @@ class Board extends React.Component {
         }
       }
       else{
-        status = "Computer plays for " + computer_side;
+        status = "Computer plays for " + computer_side + ". ";
 
-        // Check if an additional computer moves are required.
+        if(this.state.computer_skips){
 
-        
+          status += "Player goes again!"
+        }
+        if(this.state.player_skips){
+
+          status += "Player skips a turn(s)."
+        }
       }
       
     }
@@ -371,7 +372,29 @@ class Board extends React.Component {
 
       const groups = linkage.groupCount(this.state.gameboard);
 
-      status = 'Player ' + this.state.winner + ' wins! Number of groups: ' + groups;
+      if(!is_single_player){
+        status = 'Player ' + this.state.winner + ' wins! ';
+      }
+      else{
+
+        if(groups < 12){
+          if(computer_side === 'Less'){
+            status = 'Computer wins for Less! ';
+          }
+          else{
+            status = 'Player ' + this.state.winner + ' wins! ';
+          }
+        }
+        else{
+          if(computer_side === 'More'){
+            status = 'Computer wins for More! ';
+          }
+          else{
+            status = 'Player ' + this.state.winner + ' wins! ';
+          }
+        } 
+      }
+      status += 'Number of groups: ' + groups;
     }
 
     var gameboard_render = [];

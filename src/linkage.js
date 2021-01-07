@@ -265,7 +265,7 @@ export function computerMove(side, gameboard_state, previous_move, colorpieces) 
 
     rankValidMoves(valid_candidate_moves, gameboard_state, colorpieces, 'More');
 	
-	if(valid_candidate_moves.length == 0){
+	if(valid_candidate_moves.length === 0){
 		//std::cout<<"Computer skips a turn!"<<std::endl;
         //clear_previous_move();
         return null;
@@ -276,11 +276,11 @@ export function computerMove(side, gameboard_state, previous_move, colorpieces) 
 
     for(const candidate_move of valid_candidate_moves){
         
-        if(side == 'More' && candidate_move.rank > optimal_rank){
+        if(side === 'More' && candidate_move.rank > optimal_rank){
 
             optimal_rank = candidate_move.rank;
         }
-        else if(side == 'Less' && candidate_move.rank < optimal_rank){
+        else if(side === 'Less' && candidate_move.rank < optimal_rank){
 
             optimal_rank = candidate_move.rank;
         }     
@@ -291,7 +291,7 @@ export function computerMove(side, gameboard_state, previous_move, colorpieces) 
 
     for(const candidate_move of valid_candidate_moves){
 
-        if(candidate_move.rank == optimal_rank)
+        if(candidate_move.rank === optimal_rank)
             optimal_moves.push(JSON.parse(JSON.stringify(candidate_move)));
     }
 
@@ -380,9 +380,9 @@ export function rankValidMoves(candidate_moves, gameboard_state, colorpieces, co
 		candidate_move.rank += 20.0 * groups_after_candidate_move;
 
 		// Fight for the last piece!
-		if(colorpieces[candidate_move.color] == 1){
+		if(colorpieces[candidate_move.color] === 1){
 
-			if(computer_side == 'More')
+			if(computer_side === 'More')
 				candidate_move.rank += 10;
 			else
 				candidate_move.rank -=10;
