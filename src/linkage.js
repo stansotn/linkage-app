@@ -58,7 +58,7 @@ export function explorePossibleMoves(gameboard_state, previous_move, colorpieces
                     if(value > 0){
                         
                         candidate_move.color = key;
-                        possible_moves.push(candidate_move);
+                        possible_moves.push(JSON.parse(JSON.stringify(candidate_move)));
                     }
                 }		
 			}
@@ -73,7 +73,7 @@ export function explorePossibleMoves(gameboard_state, previous_move, colorpieces
 
                     if(value > 0){
                         candidate_move.color = key;
-                        possible_moves.push(candidate_move);
+                        possible_moves.push(JSON.parse(JSON.stringify(candidate_move)));
                     }
                 }		
 			}
@@ -85,6 +85,13 @@ export function explorePossibleMoves(gameboard_state, previous_move, colorpieces
     }
     
     return possible_moves;
+}
+
+// Get Pseudo random integer between two numbers.
+function getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min) + min); //The maximum is exclusive and the minimum is inclusive
 }
 
 //! group_count function.
@@ -239,7 +246,7 @@ export function isPlacementValid(candidate_move, gameboard_state){
     for(const field of candidate_move.fields){
 
         if(field[0] < 0 || field[0] >= gameboard_state.length ||
-            field[1] < 0 || field[1] >= gameboard_state[0].length){
+            field[1] < 0 || field[1] >= gameboard_state.length){
             
             return false;
         }
@@ -252,6 +259,45 @@ export function isPlacementValid(candidate_move, gameboard_state){
 
 	return true;
 }
+export function computerMove(side, gameboard_state, previous_move, colorpieces) {
+    
+	var valid_candidate_moves = explorePossibleMoves(gameboard_state, previous_move, colorpieces);
+
+    rankValidMoves(valid_candidate_moves, gameboard_state, colorpieces, 'More');
+	
+	if(valid_candidate_moves.length == 0){
+		//std::cout<<"Computer skips a turn!"<<std::endl;
+        //clear_previous_move();
+        return null;
+	}
+	
+    // Find moves with minimum rank.
+    var optimal_rank = valid_candidate_moves[0].rank;
+
+    for(const candidate_move of valid_candidate_moves){
+        
+        if(side == 'More' && candidate_move.rank > optimal_rank){
+
+            optimal_rank = candidate_move.rank;
+        }
+        else if(side == 'Less' && candidate_move.rank < optimal_rank){
+
+            optimal_rank = candidate_move.rank;
+        }     
+    }
+
+    // Pick moves with minimum rank.
+    var optimal_moves = [];
+
+    for(const candidate_move of valid_candidate_moves){
+
+        if(candidate_move.rank == optimal_rank)
+            optimal_moves.push(JSON.parse(JSON.stringify(candidate_move)));
+    }
+
+    return optimal_moves[getRandomInt(0, optimal_moves.length)];
+
+} /* needs to be written */
 
 //! is_adjacency_satisfied function.
 /**
@@ -295,4 +341,117 @@ export function isAdjacencySatisfied(candidate_move, previous_move){
     }
 
 	return true;
+}
+
+//! place_on_gameboard method.
+/**
+ *  @brief Places a move on the given &gameboard. Does not check if the move is valid.
+ *  @param move Move to be placed.
+ *  @param gameboard Gameboard to place the move.
+ */
+export function placeOnGameboard(move, gameboard){
+
+	gameboard[move.fields[0][0]][move.fields[0][1]] = move.color;
+	gameboard[move.fields[1][0]][move.fields[1][1]] = move.color;
+}
+
+//! rank_valid_moves method
+/**
+ *  @brief Assign rank to each given move.
+ *  @param candidate_moves VALID moves to rank.
+ */
+export function rankValidMoves(candidate_moves, gameboard_state, colorpieces, computer_side){
+
+	for(var candidate_move of candidate_moves){
+
+		// Copy current gameboard state.
+		var gameboard_projection = JSON.parse(JSON.stringify(gameboard_state));
+
+		// Make the candidate move on the projected gameboard.
+		placeOnGameboard(candidate_move, gameboard_projection);
+		
+		// Calculate the amount of possible moves of the next ply.
+		
+		candidate_move.rank = 0.01 * explorePossibleMoves(gameboard_projection, candidate_move, colorpieces).length;
+		//candidate_move.rank = std::roundf(candidate_move.rank*10)/10; // Ads non linear randomness and hides a bug=)
+		// Find number of groups on the projected gameboard.
+		const groups_after_candidate_move = groupCount(gameboard_projection);
+		//std::cout<<groups_after_candidate_move<<std::endl;
+		candidate_move.rank += 20.0 * groups_after_candidate_move;
+
+		// Fight for the last piece!
+		if(colorpieces[candidate_move.color] == 1){
+
+			if(computer_side == 'More')
+				candidate_move.rank += 10;
+			else
+				candidate_move.rank -=10;
+		}
+		
+		// Let's check if we can connect the tiles in the further move.
+		// Only makes sense to explore further moves if there are 2+ pieces available.
+		if(colorpieces[candidate_move.color] > 2){
+
+			var further_moves = [];
+			
+			var i = 0;
+            var j = 0;
+			
+			for(let m=0; m<gameboard_state.length; m++){
+
+                for(let n=0; n<gameboard_state.length; n++){
+
+                    var further_candidate_move = JSON.parse(JSON.stringify(clearCandidateMove(gameboard_projection)));
+
+					further_candidate_move.color = candidate_move.color;
+					further_candidate_move.fields[0][0] = i;
+					further_candidate_move.fields[0][1] = j;
+					
+					// Check horizontal placement.
+					further_candidate_move.fields[1][0] = i;
+					further_candidate_move.fields[1][1] = j + 1;
+
+                    // Do not check for adjacency here.
+					if(isPlacementValid(further_candidate_move, gameboard_projection)){
+                        
+                        further_moves.push(JSON.parse(JSON.stringify(further_candidate_move)));
+                    }
+
+					// Check vertical placement.
+					further_candidate_move.fields[1][0] = i + 1;
+					further_candidate_move.fields[1][1] = j;
+
+					// Do not check for adjacency here.
+					if(isPlacementValid(further_candidate_move, gameboard_projection)){
+
+                        further_moves.push(JSON.parse(JSON.stringify(further_candidate_move)));
+                    }
+					j++;
+				}
+				j = 0;
+				i++;
+            }
+            
+			// Find options of the candidate move to make more ways for group creation -- group forming moves.	
+			var groupforming_options = 0;
+            
+			//For each of the further moves find if any new groups can be formed.
+			for(const further_move of further_moves){
+                
+				var gameboard_projection_2 = JSON.parse(JSON.stringify(gameboard_projection));
+                
+				placeOnGameboard(further_move, gameboard_projection_2);
+				
+				// Count how many new groups can be formed.
+				if(groupCount(gameboard_projection_2) < groups_after_candidate_move){
+                    ++groupforming_options;
+                }
+                gameboard_projection_2 = null;
+			}
+			//candidate_move.rank += num_of_possible_moves(gameboard_projection_2, further_move);
+			
+			// Modify candidate move accordingly
+			candidate_move.rank -= 5.0 * groupforming_options;
+		}
+	}
 }
