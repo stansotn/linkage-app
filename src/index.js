@@ -220,9 +220,9 @@ class Board extends React.Component {
         </div>
 
         <div className="game-mode" className="game-mode-right">
-          <p className="game-mode" style={is_single_player ? (computer_side === 'Less' ? bold : normal) : disabled}>Less</p>
+          <p className="game-mode" style={is_single_player ? (computer_side === 'Less' ? bold : normal) : disabled}>More</p>
             <Switch name="computer_side" disabled={!is_single_player || this.state.winner != null} color="grey" onChange={handleChange} />
-          <p className="game-mode" style={is_single_player ? (computer_side === 'More' ? bold : normal) : disabled}>More</p>
+          <p className="game-mode" style={is_single_player ? (computer_side === 'More' ? bold : normal) : disabled}>Less</p>
         </div>
       </div>
     );
