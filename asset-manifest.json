@@ -1,8 +1,8 @@
 {
   "files": {
     "main.css": "/linkage-app/static/css/main.345b325c.chunk.css",
-    "main.js": "/linkage-app/static/js/main.0129867d.chunk.js",
-    "main.js.map": "/linkage-app/static/js/main.0129867d.chunk.js.map",
+    "main.js": "/linkage-app/static/js/main.82e7f996.chunk.js",
+    "main.js.map": "/linkage-app/static/js/main.82e7f996.chunk.js.map",
     "runtime-main.js": "/linkage-app/static/js/runtime-main.881e8f50.js",
     "runtime-main.js.map": "/linkage-app/static/js/runtime-main.881e8f50.js.map",
     "static/js/2.2b5e4b27.chunk.js": "/linkage-app/static/js/2.2b5e4b27.chunk.js",
@@ -10,12 +10,12 @@
     "index.html": "/linkage-app/index.html",
     "static/css/main.345b325c.chunk.css.map": "/linkage-app/static/css/main.345b325c.chunk.css.map",
     "static/js/2.2b5e4b27.chunk.js.LICENSE.txt": "/linkage-app/static/js/2.2b5e4b27.chunk.js.LICENSE.txt",
-    "static/js/main.0129867d.chunk.js.LICENSE.txt": "/linkage-app/static/js/main.0129867d.chunk.js.LICENSE.txt"
+    "static/js/main.82e7f996.chunk.js.LICENSE.txt": "/linkage-app/static/js/main.82e7f996.chunk.js.LICENSE.txt"
   },
   "entrypoints": [
     "static/js/runtime-main.881e8f50.js",
     "static/js/2.2b5e4b27.chunk.js",
     "static/css/main.345b325c.chunk.css",
-    "static/js/main.0129867d.chunk.js"
+    "static/js/main.82e7f996.chunk.js"
   ]
 }
